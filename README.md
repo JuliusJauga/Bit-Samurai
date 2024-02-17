@@ -1,7 +1,7 @@
 # Bit-Samurai
 A small game made in Processing 4.3.
 ## To Do
-- [ ] Fix player hitbox. Was a 64x64 box now smaller.
+- [x] Fix player hitbox. Was a 64x64 box now smaller.
 - [ ] Fix map boundaries.
 - [ ] Add respawn.
 - [ ] Implement new level functionality.

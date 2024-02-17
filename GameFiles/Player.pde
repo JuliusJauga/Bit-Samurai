@@ -25,14 +25,17 @@ class Player {
       goLeft();
       goDown();
       Jump();
-      BottomCollision = (CollisionChecker(4, 60) || CollisionChecker(60, 60));
-      LeftCollision = (CollisionChecker(4, 4) || CollisionChecker(4, 48));
-      RightCollision = (CollisionChecker(60, 4) || CollisionChecker(60, 48));
-      TopCollision = (CollisionChecker(4, 4) || CollisionChecker(60, 4));
+      BottomCollision = (CollisionChecker(16, 60) || CollisionChecker(48, 60));
+      LeftCollision = (CollisionChecker(16, 4) || CollisionChecker(16, 48));
+      RightCollision = (CollisionChecker(48, 4) || CollisionChecker(48, 48));
+      //TopCollision = (CollisionChecker(4, 4) || CollisionChecker(60, 4));
       //translateX -= playerSpeedX;
       //translateY -= playerSpeedY;
     }
     void display() {
+      //rect(x,y,64,64);
+      //fill(255);
+      //rect(x + 4,y + 4, 56, 56);
       playerAnimation(getAnimationFrameIndex());
     }
     void goLeft() {
@@ -98,25 +101,34 @@ class Player {
       else return true;
     }
     void playerAnimation(int index) {
-      if (BottomCollision == true && RightCollision == true && playerSpeedY < 0) {
-        image(climbRight[index], x, y);
+      if (BottomCollision == true && RightCollision == true && playerSpeedY == 0) {
+        image(climbRight[0], x - 20, y);
+      }
+      else if (BottomCollision == true && LeftCollision == true && playerSpeedY == 0) {
+        image(climbLeft[0], x - 5, y);
+      }
+      else if (BottomCollision == true && RightCollision == true && playerSpeedY < 0) {
+        image(climbRight[index], x - 20, y);
       }
       else if (BottomCollision == true && LeftCollision == true && playerSpeedY < 0) {
-        image(climbLeft[index], x, y);
+        image(climbLeft[index], x - 8, y);
       }
       else if (AirTime == true) {
         if (RunningLeft == false) {
           //if (index == 5)
-          image(jumpRight[index], x, y);
+          image(jumpRight[index], x - 17, y - 15);
         }
         if (RunningLeft == true) {
-          image(jumpLeft[index], x, y);
+          image(jumpLeft[index], x - 17, y - 15);
         }
       }
       else {
-        if (RunningLeft == true) image(runLeft[index], x, y);
-        else if (RunningRight == true) image(runRight[index], x, y);
-        else image(idle[index], x, y);
+        if (RunningLeft == true) image(runLeft[index], x - 17, y - 15);
+        else if (RunningRight == true) image(runRight[index], x - 17, y - 15);
+        else {
+          //image(idle[index], x, y);
+          image(idle[index], x - 17, y - 15);
+        }
       }
     }
     int getAnimationFrameIndex() {

@@ -1,5 +1,8 @@
 import processing.sound.*;
-SoundFile file;
+import ddf.minim.*;
+Minim minim, minim2;
+AudioPlayer lose, coin, jump, land;
+//SoundFile lose;
 PImage myImage;
 PImage background;
 PImage subimage;
@@ -23,8 +26,6 @@ int mapHeight;
 int mapWidth;
 int sheetWidth;
 int sheetHeight;
-int resolutionX = 1280;
-int resolutionY = 640;
 JSONObject jsonMap;
 JSONArray layers;
 JSONArray jsonArray;
@@ -33,11 +34,6 @@ JSONObject layer;
 boolean notAir = true;
 int translateX;
 int translateY;
-int step = 64;
-int playerX;
-int playerY;
-int playerTranslateX;
-int playerTranslateY;
 int playerSpeedY;
 int playerSpeedX;
 int belowPlayerTile;
@@ -45,11 +41,13 @@ boolean keyAPressed = false;
 boolean keyDPressed = false;
 boolean spacePressed = false;
 
-int airTile = 135;
+int airTile = 143;
+int spikeTile = 133;
+int coinTile = 17;
 // Attributes
 int gravity = 1;
-int playerSpeedCap = 10;
-int jumpStrength = 12;
+int playerSpeedCap = 20;
+int jumpStrength = 18;
 int acceleration = 2;
 int startTime;
 int elapsedTime;
@@ -61,19 +59,14 @@ boolean notLeftWall = true;
 boolean notRightWall = true;
 boolean ground = false;
 PImage[] subimage_array;
+PImage icon;
 void setup() {
-  frameRate(60);
-  print(resolutionX);
   size(1280,640);
-  playerX = width / 2;
-  playerY = height / 2;
+  frameRate(60);
   ok = new Player();
-  //translateY;
-  translateY = 0;
-  translateX = width / 2;
-  //translateY += 800;
-  myImage = loadImage("Source\\sheet.png");
-  background = loadImage("Source\\background.jpg");
+  reset_game();
+  myImage = loadImage("map_source\\test_shee.png");
+  background = loadImage("map_source\\background.jpg");
   leftRunSource = loadImage("Animations\\RUN_LEFT.png");
   rightRunSource = loadImage("Animations\\RUN_RIGHT.png");
   idleSource = loadImage("Animations\\IDLE.png");
@@ -81,17 +74,10 @@ void setup() {
   jumpRightSource = loadImage("Animations\\JUMP_RIGHT.png");
   climbRightSource = loadImage("Animations\\CLIMB_RIGHT.png");
   climbLeftSource = loadImage("Animations\\CLIMB_LEFT.png");
-  background.resize(1280, 0);
-  //subimage = myImage.get(128, 0, 16, 16);
+  background.resize(width,0);
   sheetHeight = myImage.height / tileSize;
   sheetWidth = myImage.width / tileSize;
   subimage_array = new PImage[sheetHeight * sheetWidth];
-  jsonMap = loadJSONObject("map_editor\\grid_data.json");
-  layers = jsonMap.getJSONArray("layers");
-  layer = layers.getJSONObject(0);
-  jsonArray = layer.getJSONArray("data");
-  mapWidth = jsonMap.getInt("width");
-  mapHeight = jsonMap.getInt("height");
   for(int i = 0; i < sheetHeight; i++) {
     for(int j = 0; j < sheetWidth; j++) {
       subimage_array[i*sheetWidth+j] = myImage.get(j * tileSize, i * tileSize, tileSize, tileSize);
@@ -106,67 +92,55 @@ void setup() {
     climbRight[i] = climbRightSource.get(i * 96, 0, 96, 87);
     climbLeft[i] = climbLeftSource.get(i * 96, 0, 96, 87);
   }
-  //file = new SoundFile(this, ".mp3");
-  //file.jump(20.0);
-  //file.play();
+  minim = new Minim(this);
+  minim2 = new Minim(this);
+  lose = minim.loadFile("GameMusic/lose.mp3");
+  land = minim.loadFile("GameMusic/land.mp3");
+  jump = minim.loadFile("GameMusic/jump.wav");
+  coin = minim2.loadFile("GameMusic/coin.mp3");
+  //AudioPlayer tate = minim.loadFile("tate.mp3");
+  //tate.play();
 }
-
 void draw() {
   elapsedTime = millis() - startTime;
   if (elapsedTime >= 600) {
     startTime = millis();
   }
-  println(elapsedTime);
-  background(150, 170, 10);
-  frameRate(60);
   image(background, 0 ,0);
   text(mouseX + " : " + mouseY, 400, 200);
   text("Player speed Y: " + playerSpeedY, 400, 300);
   text("Player speed X: " + playerSpeedX, 400, 400);
   translate(translateX, translateY);
   DrawMapArray();
-  playerMovement();
-  fill(255, 0, 0);
-  rect(playerX, playerY, 64, 64);
   ok.display();
   ok.update();
 }
 void keyPressed() {
-  if (key == 32 && notAir) {
-    spacePressed = true;
+  if (key == 32) {
+    ok.onAir = true;
   }
-  if (key == 'a' || key == 'A') {
-    keyAPressed = true;
+  if (key == 'a' || key == 'A' || keyCode == LEFT) {
+    ok.goingLeft = true;
   }
-  if ((key == 'd' || key == 'D') && notRightWall) {
-    keyDPressed = true;
+  if ((key == 'd' || key == 'D') || keyCode == RIGHT) {
+    ok.goingRight = true;
   }
 }
 void keyReleased() {
-  if (key == 'a' || key == 'A') {
+  if (key == 'a' || key == 'A' || keyCode == LEFT) {
     ok.goingLeft = false;
     playerSpeedX = 0;
     keyAPressed = false;
   }
-  if (key == 'd' || key == 'D') {
+  if (key == 'd' || key == 'D' || keyCode == RIGHT) {
     ok.goingRight = false;
     playerSpeedX = 0;
-    keyDPressed = false;
   }
   if (key == 32) {
-    spacePressed = false;
     ok.onAir = false;
   }
-}
-void playerMovement() {
-  if (spacePressed && notAir) {
-    ok.onAir = true;
-  }
-  if (keyAPressed && notLeftWall) {
-    ok.goingLeft = true;
-  }
-  if (keyDPressed && notRightWall) {
-    ok.goingRight = true;
+  if (key == 'E' || key == 'e') {
+    reset_game();
   }
 }
 void DrawMapArray() {
@@ -178,4 +152,15 @@ void DrawMapArray() {
       image(subimage_array[temp], j*resize, i*resize);
     }
   }
+}
+void reset_game() {
+  ok.reset();
+  jsonMap = loadJSONObject("Levels\\level2.json");
+  layers = jsonMap.getJSONArray("layers");
+  layer = layers.getJSONObject(0);
+  jsonArray = layer.getJSONArray("data");
+  mapWidth = jsonMap.getInt("width");
+  mapHeight = jsonMap.getInt("height");
+  translateY = 0;
+  translateX = width / 2;
 }

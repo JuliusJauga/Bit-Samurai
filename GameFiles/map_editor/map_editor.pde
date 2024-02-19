@@ -14,14 +14,17 @@ int mousePosX;
 int mousePosY;
 boolean mouseClick = false;
 boolean mouseClickBool = false;
+boolean TakingInput = false;
+String userInput = "";
 Button SaveButton;
 Button LoadButton;
 Button NewButton;
+Button MapNameButton;
 void setup() {
   size(1280, 640);
   fill(255, 0, 0);
   textSize(30);
-  image = loadImage("..\\Source\\sheet.png");
+  image = loadImage("..\\map_source\\test_shee.png");
   imageHeight = image.height;
   imageWidth = image.width;
   mapHeight = image.height / tileSize;
@@ -44,6 +47,8 @@ void setup() {
   NewButton.Text = "New Map";
   LoadButton = new Button(width - 250, imageHeight / 2 + 1, 250,imageHeight / 2 - 1);
   LoadButton.Text = "Load Map";
+  MapNameButton = new Button(width - 500 - 2, 0, 250, imageHeight / 2 - 2);
+  MapNameButton.Text = "|";
   //LoadMap();
 }
 
@@ -53,6 +58,7 @@ int spacing = 32;
 int translateX = 0;
 void draw() {
   background(125, 125, 125);
+  MapNameButton.Text = userInput;
   //stroke(255);
   //strokeWeight(2);
   x = 0;
@@ -77,6 +83,7 @@ void draw() {
   SaveButton.Display();
   NewButton.Display();
   LoadButton.Display();
+  MapNameButton.Display();
   mouseClickBool = false;
 }
 void makeSubArray() {
@@ -117,6 +124,15 @@ void mouseClicked() {
   }
   mouseClickBool = true;
 }
+void keyPressed() {
+  if (TakingInput == true) {
+    if (key != 8 && key != 10 && key != 13 && key != 127 && keyCode != 20) {
+      // Append the character to the user input string
+      userInput += key;
+      println(userInput);
+    }
+  }
+}
 void drawGrid() {
   int H = (height-imageHeight)/gridTile;//width / gridTile * (height-imageHeight) / gridTile
   int W = (width / gridTile);
@@ -148,7 +164,7 @@ void SaveMap() {
   json.setJSONArray("layers", layers);
 
   // Save the JSONObject to a file
-  saveJSONObject(json, "grid_data.json");
+  saveJSONObject(json, userInput);
   println("JSON file saved!");
 }
 void NewMap() {
@@ -165,7 +181,7 @@ void LoadMap() {
   int mapW;
   int mapH;
   int temp;
-  jsonMap = loadJSONObject("grid_data.json");
+  jsonMap = loadJSONObject(userInput);
   layers = jsonMap.getJSONArray("layers");
   layer = layers.getJSONObject(0);
   jsonArray = layer.getJSONArray("data");

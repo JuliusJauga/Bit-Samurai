@@ -17,16 +17,25 @@ class Button {
   }
   void Display() {
   if (mouseX >= x && mouseX <= x + Wh && mouseY >= y && mouseY <= y + Ht) {
-    fill(100, 100, 100, 100);
+    fill(100, 100);
     if (mouseClickBool == true) {
       fill(25, 255, 25);
-      if (y < imageHeight / 2) {
+      if (y < imageHeight / 2 && x < width - 250) {
+        if (TakingInput == true) {
+          TakingInput = false;
+          userInput = "";
+        }
+        else {
+          TakingInput = true;
+        }
+      }
+      else if (y < imageHeight / 2) {
         NewMap();
       }
       else if (x < width - 250) {
         SaveMap();
       }
-      else {
+      else /*if (x < )*/{
         LoadMap();
       }
     }
@@ -34,10 +43,10 @@ class Button {
   else {
     fill(colour);
   }
-  fill(255,0,0);
+  //fill(255,0,0);
   rect(x,y,Wh,Ht);
-  fill(0,255,0);
-  rect(x+4,y+4,Wh-4,Ht-4);
+  //fill(0,255,0);
+  //rect(x+4,y+4,Wh-4,Ht-4);
   fill(0);
   text(Text, x + (Wh/2 - Wh/4), y + (Ht / 2 + Ht / 4));
   

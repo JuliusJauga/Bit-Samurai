@@ -15,6 +15,9 @@ class Player {
     boolean RunningRight = false;
     boolean AirTime = false;
     boolean landed = false;
+    int tile;
+    int tile2;
+    int tilething;
     Player() {
     x = 64;
     y = height / 2;
@@ -35,22 +38,17 @@ class Player {
       BottomCollision = (CollisionChecker(16, 60) || CollisionChecker(48, 60));
       LeftCollision = (CollisionChecker(16, 4) || CollisionChecker(16, 48));
       RightCollision = (CollisionChecker(48, 4) || CollisionChecker(48, 48));
-      int tile2 = y / resize;
+      //int tile2 = y / resize;
       fill(255);
-      text(tile2, x, y - 100);
-      textSize(30);
-      //text("BETA", x - 900, y -500);
       text("BottomCollision: " + BottomCollision, x, y - 200);
       textSize(10);
       //TopCollision = (CollisionChecker(4, 4) || CollisionChecker(60, 4));
-      //translateX -= playerSpeedX;
-      //translateY -= playerSpeedY;
     }
     void display() {
-      //rect(x,y,64,64);
-      //fill(255);
-      //rect(x + 4,y + 4, 56, 56);
       playerAnimation(getAnimationFrameIndex());
+      textSize(30);
+      text("COINS LEFT " + coinCount, x - width / 2, y - height / 2 + 100);
+      textSize(10);
     }
     void goLeft() {
       if (playerSpeedX < 0) RunningLeft = true;
@@ -78,24 +76,26 @@ class Player {
     }
     void goDown() {
       if (BottomCollision == false) {
-        playerSpeedY += gravity;
-        int tile = (y + playerSpeedY + resize) / 64 * mapWidth + (x+32) / 64;
-        if (tile < mapWidth * mapHeight && tile >= 0) {
+        if (playerSpeedY < terminalVelocity) {
+          playerSpeedY += gravity;
+        }
+        tilething = (y + playerSpeedY + resize) / 64 * mapWidth + (x+32) / 64;
+        if (tilething < mapWidth * mapHeight && tilething >= 0) {
           //println(jsonArray.getInt(tile));
-          if (jsonArray.getInt(tile) == coinTile) {
-            jsonArray.setInt(tile, airTile);
+          if (jsonArray.getInt(tilething) == coinTile) {
+            jsonArray.setInt(tilething, airTile);
             if (coin.isPlaying()) {
               coin.rewind();
             }
             coin.play();
             coin.rewind();
+            coinCount--;
           }
-          if (jsonArray.getInt(tile) < airTile) {
+          if (jsonArray.getInt(tilething) < airTile) {
             playerSpeedY = 2;
-            println("Is this happening constantly?");
             landed = true;
           }
-        } 
+        }
         y += playerSpeedY;
         translateY -= playerSpeedY;
         return;
@@ -130,12 +130,22 @@ class Player {
       }
     }
     boolean CollisionChecker(int dX, int dY) {
-      int tile = (x + dX) / resize;
-      int tile2 = (y + dY) / resize;
+      tile = (x + dX) / resize;
+      tile2 = (y + dY) / resize;
       if (tile2 > mapHeight + 10) {
         lose.play();
         lose.rewind();
         reset_game();
+      }
+      if (tile > mapWidth) {
+        if (loadJSONObject("Levels\\level" + str(currentLevel + 1) + ".json") == null) {
+          return false;
+        }
+        else if (coinCount == 0){
+          currentLevel++;
+          reset_game();
+        }
+        return false;
       }
       if (tile > mapWidth - 1 || tile < 0 || tile2 > mapHeight - 1 || tile2 < 0) return false;
       else if (jsonArray.getInt(tile2 * mapWidth + tile) == coinTile) {
@@ -145,6 +155,7 @@ class Player {
         }
         coin.play();
         coin.rewind();
+        coinCount--;
         return false;
       }
       else if (jsonArray.getInt(tile2 * mapWidth + tile) >= spikeTile && jsonArray.getInt(tile2 * mapWidth + tile) <= spikeTile + 4) {

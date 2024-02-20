@@ -29,7 +29,9 @@ int sheetHeight;
 JSONObject jsonMap;
 JSONArray layers;
 JSONArray jsonArray;
+JSONArray jsonArray2;
 JSONObject layer;
+JSONObject layer2;
 
 boolean notAir = true;
 int translateX;
@@ -41,28 +43,31 @@ boolean keyAPressed = false;
 boolean keyDPressed = false;
 boolean spacePressed = false;
 
+int currentLevel = 1;
 int airTile = 143;
 int spikeTile = 133;
 int coinTile = 17;
+int coinCount;
 // Attributes
 int gravity = 1;
 int playerSpeedCap = 20;
 int jumpStrength = 18;
 int acceleration = 2;
+int terminalVelocity = 70;
 int startTime;
 int elapsedTime;
 Player ok;
 
+int temp;
+int temp2;
 boolean goDown = true;
 boolean changed = false;
 boolean notLeftWall = true;
 boolean notRightWall = true;
-boolean ground = false;
 PImage[] subimage_array;
-PImage icon;
 void setup() {
   size(1280,640);
-  frameRate(60);
+  //frameRate(60);
   ok = new Player();
   reset_game();
   myImage = loadImage("map_source\\test_shee.png");
@@ -81,6 +86,7 @@ void setup() {
   for(int i = 0; i < sheetHeight; i++) {
     for(int j = 0; j < sheetWidth; j++) {
       subimage_array[i*sheetWidth+j] = myImage.get(j * tileSize, i * tileSize, tileSize, tileSize);
+      subimage_array[i*sheetWidth+j].resize(resize, resize);
     }
   }
   for(int i = 0; i < 6; i++) {
@@ -102,6 +108,7 @@ void setup() {
   //tate.play();
 }
 void draw() {
+  //println(frameRate);
   elapsedTime = millis() - startTime;
   if (elapsedTime >= 600) {
     startTime = millis();
@@ -144,23 +151,38 @@ void keyReleased() {
   }
 }
 void DrawMapArray() {
-  int temp;
   for(int i = 0; i < mapHeight; i++) {
     for(int j = 0; j < mapWidth; j++) {
-      temp = jsonArray.getInt(i*mapWidth + j);
-      subimage_array[temp].resize(resize, resize);
+      temp = jsonArray2.getInt(i*mapWidth + j);
       image(subimage_array[temp], j*resize, i*resize);
     }
   }
+  for(int i = 0; i < mapHeight; i++) {
+    for(int j = 0; j < mapWidth; j++) {
+      temp = jsonArray.getInt(i*mapWidth + j);
+      image(subimage_array[temp], j*resize, i*resize);
+    }
+  }
+  
 }
 void reset_game() {
+  coinCount = 0;
   ok.reset();
-  jsonMap = loadJSONObject("Levels\\level2.json");
+  jsonMap = loadJSONObject("Levels\\level" + str(currentLevel) + ".json");
   layers = jsonMap.getJSONArray("layers");
-  layer = layers.getJSONObject(0);
+  layer = layers.getJSONObject(1);
+  layer2 = layers.getJSONObject(0);
   jsonArray = layer.getJSONArray("data");
+  jsonArray2 = layer2.getJSONArray("data");
   mapWidth = jsonMap.getInt("width");
   mapHeight = jsonMap.getInt("height");
+  for(int i = 0; i < mapHeight; i++) {
+    for(int j = 0; j < mapWidth; j++) {
+      if (jsonArray.getInt(i*mapWidth + j) == coinTile) {
+        coinCount++;
+      }
+    }
+  }
   translateY = 0;
   translateX = width / 2;
 }

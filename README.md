@@ -9,6 +9,6 @@ A small game made in Processing 4.3.
 - [x] Implement 2 layer feature in map editor, collision and no collision layers.
 - [ ] Add falling straight animation.
 - [ ] Clean up the code.
-- [ ] Fix up the spike collisions.
-- [ ] Optimize map editor.
+- [x] Fix up the spike collisions.
+- [x] Optimize map editor.
 - [x] Optimize the game.

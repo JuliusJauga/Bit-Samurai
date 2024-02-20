@@ -7,7 +7,7 @@ class Player {
     
     boolean LeftCollision = false;
     boolean RightCollision = false;
-    boolean TopCollision = false;
+    boolean SpikeCollision = false;
     boolean BottomCollision = false;
     boolean Climbing = false;
     
@@ -38,6 +38,14 @@ class Player {
       BottomCollision = (CollisionChecker(16, 60) || CollisionChecker(48, 60));
       LeftCollision = (CollisionChecker(16, 4) || CollisionChecker(16, 48));
       RightCollision = (CollisionChecker(48, 4) || CollisionChecker(48, 48));
+      if (SpikeCollisionCheck(32,0) == true || SpikeCollisionCheck(32,60) == true) {
+        if (lose.isPlaying()) {
+          lose.rewind();
+        }
+        lose.play();
+        lose.rewind();
+        reset_game();
+      }
       //int tile2 = y / resize;
       fill(255);
       text("BottomCollision: " + BottomCollision, x, y - 200);
@@ -45,6 +53,7 @@ class Player {
       //TopCollision = (CollisionChecker(4, 4) || CollisionChecker(60, 4));
     }
     void display() {
+      //rect(x,y,64,64);
       playerAnimation(getAnimationFrameIndex());
       textSize(30);
       text("COINS LEFT " + coinCount, x - width / 2, y - height / 2 + 100);
@@ -81,7 +90,6 @@ class Player {
         }
         tilething = (y + playerSpeedY + resize) / 64 * mapWidth + (x+32) / 64;
         if (tilething < mapWidth * mapHeight && tilething >= 0) {
-          //println(jsonArray.getInt(tile));
           if (jsonArray.getInt(tilething) == coinTile) {
             jsonArray.setInt(tilething, airTile);
             if (coin.isPlaying()) {
@@ -159,12 +167,6 @@ class Player {
         return false;
       }
       else if (jsonArray.getInt(tile2 * mapWidth + tile) >= spikeTile && jsonArray.getInt(tile2 * mapWidth + tile) <= spikeTile + 4) {
-        if (lose.isPlaying()) {
-          lose.rewind();
-        }
-        lose.play();
-        lose.rewind();
-        reset_game();
         return false;
       }
       else if (jsonArray.getInt(tile2 * mapWidth + tile) >= airTile) {
@@ -173,6 +175,15 @@ class Player {
       else {
         return true;
       }
+    }
+    boolean SpikeCollisionCheck(int dX, int dY) {
+      tile = (x + dX) / resize;
+      tile2 = (y + dY) / resize;
+      if (tile > mapWidth - 1 || tile < 0 || tile2 > mapHeight - 1 || tile2 < 0) return false;
+      if (jsonArray.getInt(tile2 * mapWidth + tile) >= spikeTile && jsonArray.getInt(tile2 * mapWidth + tile) <= spikeTile + 4) {
+        return true;
+      }
+      return false;
     }
     void playerAnimation(int index) {
       if (BottomCollision == true && RightCollision == true && playerSpeedY == 0) {

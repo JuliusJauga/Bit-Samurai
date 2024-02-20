@@ -16,6 +16,7 @@ int clickedID;
 PImage[] grid;
 int[] gridIDArr;
 PImage[] othergrid;
+PImage[] gridSubArr;
 int[] othergridIDArr;
 int gridTile = 32;
 int mousePosX;
@@ -24,6 +25,9 @@ boolean mouseClick = false;
 boolean mouseClickBool = false;
 boolean TakingInput = false;
 String userInput = "";
+int testFPS = 0;
+int screenWidth;
+int screenHeight;
 Button SaveButton;
 Button LoadButton;
 Button NewButton;
@@ -31,6 +35,7 @@ Button MapNameButton;
 Button NoCollisionButton;
 Button CollisionButton;
 void setup() {
+  frameRate(60);
   size(1280, 640);
   fill(255, 0, 0);
   textSize(30);
@@ -41,62 +46,74 @@ void setup() {
   imageWidth = image.width;
   mapHeight = image.height / tileSize;
   mapWidth = image.width / tileSize;
+  screenWidth = width;
+  screenHeight = height;
   subImgArr = new PImage[mapHeight * mapWidth];
-  grid = new PImage[width / gridTile * (height-imageHeight) / gridTile];
-  gridIDArr = new int[width / gridTile * (height-imageHeight) / gridTile];
-  othergrid = new PImage[width / gridTile * (height-imageHeight) / gridTile];
-  othergridIDArr = new int[width / gridTile * (height-imageHeight) / gridTile];
+  gridSubArr = new PImage[mapHeight * mapWidth];
+  grid = new PImage[screenWidth / gridTile * (screenHeight-imageHeight) / gridTile];
+  gridIDArr = new int[screenWidth / gridTile * (screenHeight-imageHeight) / gridTile];
+  othergrid = new PImage[screenWidth / gridTile * (screenHeight-imageHeight) / gridTile];
+  othergridIDArr = new int[screenWidth / gridTile * (screenHeight-imageHeight) / gridTile];
   makeSubArray();
   NewMap();
-  clickedImg = subImgArr[mapHeight * mapWidth - 1].get(0, 0, tileSize, tileSize);
+  clickedImg = subImgArr[mapHeight * mapWidth - 1].get(0, 0, spacing, spacing);
   clickedID = mapHeight * mapWidth - 1;
-  SaveButton = new Button(width - 500 - 2, imageHeight / 2 + 1, 250, imageHeight / 2 - 1);
+  SaveButton = new Button(screenWidth - 500 - 2, imageHeight / 2 + 1, 250, imageHeight / 2 - 1);
   SaveButton.Text = "Save Map";
   SaveButton.SaveMapButton = true;
-  NewButton = new Button(width - 250, 0, 250, imageHeight / 2 - 2);
+  NewButton = new Button(screenWidth - 250, 0, 250, imageHeight / 2 - 2);
   NewButton.Text = "New Map";
   NewButton.NewMapButton = true;
-  LoadButton = new Button(width - 250, imageHeight / 2 + 1, 250,imageHeight / 2 - 1);
+  LoadButton = new Button(screenWidth - 250, imageHeight / 2 + 1, 250,imageHeight / 2 - 1);
   LoadButton.Text = "Load Map";
   LoadButton.LoadMapButton = true;
-  MapNameButton = new Button(width - 500 - 2, 0, 250, imageHeight / 2 - 2);
+  MapNameButton = new Button(screenWidth - 500 - 2, 0, 250, imageHeight / 2 - 2);
   MapNameButton.Text = "|";
   MapNameButton.MapNameButton = true;
-  CollisionButton = new Button(width - 750 - 4, 0, 250, imageHeight / 2 - 2);
+  CollisionButton = new Button(screenWidth - 750 - 4, 0, 250, imageHeight / 2 - 2);
   CollisionButton.Text = "Solid Layer";
   CollisionButton.SolidLayerButton = true;
-  NoCollisionButton = new Button(width - 750 - 4, imageHeight / 2 + 1, 250, imageHeight / 2 - 1);
+  NoCollisionButton = new Button(screenWidth - 750 - 4, imageHeight / 2 + 1, 250, imageHeight / 2 - 1);
   NoCollisionButton.Text = "Non-Solid";
   NoCollisionButton.NonSolidLayerButton = true;
   openedEye.resize(0, imageHeight / 2 - 1);
   closedEye.resize(0, imageHeight / 2 - 1);
   //LoadMap();
+  
 }
 
 int x;
 int y;
 int spacing = 32;
-int translateX = 0;
+int mY, mX;
 void draw() {
+  println(frameRate);
   background(125, 125, 125);
-  MapNameButton.Text = userInput;
+  if (TakingInput == false) {
+    MapNameButton.Text = "default.json";
+  }
+  else {
+    MapNameButton.Text = userInput;
+  }
   //stroke(255);
   //strokeWeight(2);
   x = 0;
-  while (x < width ) {
-    line(x, imageHeight, x, height);
+  while (x < screenWidth) {
+    line(x, imageHeight, x, screenHeight);
     x = x + spacing;
   }
   y = imageHeight;
-  while (y < height) {
-    line(0, y, width, y);
+  while (y < screenHeight) {
+    line(0, y, screenWidth, y);
     y = y + spacing;
   }
   makeSubArray();
+  mX = mouseX;
+  mY = mouseY;
   //image(subImgArr[3 * 17 + 8], 320, 320);
-  if (mouseX < imageWidth && mouseX > 0 && mouseY < imageHeight && mouseY > 0) {
-    mousePosX = (int)(mouseX / tileSize);
-    mousePosY = (int)(mouseY / tileSize);
+  if (mX < imageWidth && mX > 0 && mY < imageHeight && mY > 0) {
+    mousePosX = (int)(mX / tileSize);
+    mousePosY = (int)(mY / tileSize);
     text(mousePosX + " : " + mousePosY, imageWidth + 30, 30);
   }
   drawGrid();
@@ -109,19 +126,19 @@ void draw() {
   NoCollisionButton.Display();
   mouseClickBool = false;
   fill(255);
-  rect(width - 830, 0, 74, imageHeight/2 - 2);
-  rect(width - 830, imageHeight/2 + 1, 74, imageHeight/2 - 1);
+  rect(screenWidth - 830, 0, 74, imageHeight/2 - 2);
+  rect(screenWidth - 830, imageHeight/2 + 1, 74, imageHeight/2 - 1);
   if (seeSolid == true) {
-    image(openedEye, width - 830, 0);
+    image(openedEye,screenWidth - 830, 0);
   }
   else if (seeSolid == false) {
-    image(closedEye, width - 830, 0);
+    image(closedEye, screenWidth - 830, 0);
   }
   if (seeNonSolid == true) {
-    image(openedEye, width - 830, imageHeight/2);
+    image(openedEye, screenWidth - 830, imageHeight/2);
   }
   else if (seeNonSolid == false) {
-    image(closedEye, width - 830, imageHeight/2);
+    image(closedEye, screenWidth - 830, imageHeight/2);
   }
 }
 void makeSubArray() {
@@ -129,29 +146,36 @@ void makeSubArray() {
     for (int j = 0; j < mapWidth; j++) {
       subImgArr[i*mapWidth + j] = image.get(j * tileSize, i * tileSize, tileSize, tileSize);
       image(subImgArr[i*mapWidth + j], j * 16, i * 16);
+      gridSubArr[i*mapWidth + j] = subImgArr[i*mapWidth + j];
+      gridSubArr[i*mapWidth + j].resize(spacing,spacing);
     }
+  }
+  x = 0;
+  while (x < imageWidth + 1) {
+    line(x, 0, x, imageHeight);
+    x = x + tileSize;
+  }
+  y = 0;
+  while (y < imageHeight) {
+    line(0, y, imageWidth, y);
+    y = y + tileSize;
   }
 }
 void Drawing() {
-  if (mouseX < imageWidth && mouseX > 0 && mouseY < imageHeight && mouseY > 0) image(clickedImg, mouseX, mouseY, 32, 32);
-     if ((mouseX > imageWidth || mouseX < 0) || (mouseY > imageHeight || mouseY < 0)) {
-      if (mouseY > imageHeight && mouseX >= 0) {
-        //mouseX / 32
-        //(mouseY - imageHeight) / 32
-        image(clickedImg, mouseX, mouseY, 32, 32);
-        
+  if (mX < imageWidth && mX > 0 && mY < imageHeight && mY > 0) image(clickedImg, mX, mY);
+  if ((mX > 0 && mX < screenWidth) && (mY > imageHeight && mY < screenHeight)) {
+        image(clickedImg, mX, mY);
         if (mouseClick == true) {
           if (noCollisionLayer == true) {
-            othergrid[(mouseX / gridTile) + ((mouseY - imageHeight) / gridTile * (width / gridTile))] = clickedImg;
-            othergridIDArr[(mouseX / gridTile) + ((mouseY - imageHeight) / gridTile * (width / gridTile))] = clickedID;
+            othergrid[(mX / gridTile) + ((mY - imageHeight) / gridTile * (screenWidth / gridTile))] = clickedImg;
+            othergridIDArr[(mX / gridTile) + ((mY - imageHeight) / gridTile * (screenWidth / gridTile))] = clickedID;
           }
           else if (CollisionLayer == true) {
-            grid[(mouseX / gridTile) + ((mouseY - imageHeight) / gridTile * (width / gridTile))] = clickedImg;
-            gridIDArr[(mouseX / gridTile) + ((mouseY - imageHeight) / gridTile * (width / gridTile))] = clickedID;
+            grid[(mX / gridTile) + ((mY - imageHeight) / gridTile * (screenWidth / gridTile))] = clickedImg;
+            gridIDArr[(mX / gridTile) + ((mY - imageHeight) / gridTile * (screenWidth / gridTile))] = clickedID;
           }
-        }
       }
-    }
+   }
 }
 void mouseReleased() {
   mouseClick = false;
@@ -160,22 +184,22 @@ void mousePressed() {
   mouseClick = true;
 }
 void mouseClicked() {
-  if (mouseX >= width - 830 && mouseX <= width - 756 && mouseY >= 0 && mouseY <= imageHeight / 2 - 1) {
+  if (mX >= screenWidth - 830 && mX <= screenWidth - 756 && mY >= 0 && mY <= imageHeight / 2 - 1) {
     if(seeSolid == true) {
       seeSolid = false;
     }
     else seeSolid = true;
   }
-  if (mouseX >= width - 830 && mouseX <= width - 756 && mouseY >= imageHeight / 2 - 1 && mouseY <= imageHeight) {
+  if (mX >= screenWidth - 830 && mX <= screenWidth - 756 && mY >= imageHeight / 2 - 1 && mY <= imageHeight) {
     if(seeNonSolid == true) {
       seeNonSolid = false;
     }
     else seeNonSolid = true;
   }
-  if (mouseX < imageWidth && mouseX > 0 && mouseY < imageHeight && mouseY > 0) {
-    mousePosX = (int)(mouseX / tileSize);
-    mousePosY = (int)(mouseY / tileSize);
-    clickedImg = subImgArr[mousePosY * mapWidth + mousePosX].get(0, 0, tileSize, tileSize);
+  if (mX < imageWidth && mX > 0 && mY < imageHeight && mY > 0) {
+    mousePosX = (int)(mX / tileSize);
+    mousePosY = (int)(mY / tileSize);
+    clickedImg = gridSubArr[mousePosY * mapWidth + mousePosX];
     clickedID = mousePosY * mapWidth + mousePosX;
   }
   mouseClickBool = true;
@@ -187,35 +211,37 @@ void keyPressed() {
     }
   }
 }
+int H;
+int W;
 void drawGrid() {
-  int H = (height-imageHeight)/gridTile;//width / gridTile * (height-imageHeight) / gridTile
-  int W = (width / gridTile);
+  H = (screenHeight-imageHeight)/gridTile;//width / gridTile * (height-imageHeight) / gridTile
+  W = (screenWidth / gridTile);
   if (seeNonSolid == true) {
     for (int i = 0; i < H; i++) {
       for (int j = 0; j < W; j++) {
-        image(othergrid[i*W + j], j * gridTile, i * gridTile + imageHeight, gridTile, gridTile);
+        image(othergrid[i*W + j], j * gridTile, i * gridTile + imageHeight);
       }
     }
   }
   if (seeSolid == true) {
     for (int i = 0; i < H; i++) {
       for (int j = 0; j < W; j++) {
-        image(grid[i*W + j], j * gridTile, i * gridTile + imageHeight, gridTile, gridTile);
+        image(grid[i*W + j], j * gridTile, i * gridTile + imageHeight);
       }
     }
   }
 }
 void SaveMap() {
    JSONObject json = new JSONObject();
-   json.setInt("height",(height-imageHeight)/gridTile);
-   json.setInt("width",(width / gridTile));
+   json.setInt("height",(screenHeight-imageHeight)/gridTile);
+   json.setInt("width",(screenWidth / gridTile));
    JSONArray layers = new JSONArray();
    JSONArray dataNoSolid = new JSONArray();
    JSONArray dataSolid = new JSONArray();
-   for(int i = 0; i < (height-imageHeight)/gridTile; i++) {
-     for(int j = 0; j < (width / gridTile); j++) {
-       dataNoSolid.setInt((width / gridTile) * i + j, othergridIDArr[i * (width / gridTile) + j]);
-       dataSolid.setInt((width / gridTile) * i + j, gridIDArr[i * (width / gridTile) + j]);
+   for(int i = 0; i < (screenHeight-imageHeight)/gridTile; i++) {
+     for(int j = 0; j < (screenWidth / gridTile); j++) {
+       dataNoSolid.setInt((screenWidth / gridTile) * i + j, othergridIDArr[i * (screenWidth / gridTile) + j]);
+       dataSolid.setInt((screenWidth / gridTile) * i + j, gridIDArr[i * (screenWidth / gridTile) + j]);
      }
    }
    // Create a JSONObject for the data array
@@ -236,11 +262,11 @@ void SaveMap() {
   println("JSON file saved!");
 }
 void NewMap() {
-  for (int i = 0; i < width / gridTile * (height-imageHeight) / gridTile; i++) {
+  for (int i = 0; i < screenWidth / gridTile * (screenHeight-imageHeight) / gridTile; i++) {
     othergridIDArr[i] = mapHeight * mapWidth - 1;
-    othergrid[i] = subImgArr[mapHeight * mapWidth - 1].get(0, 0, tileSize, tileSize);
+    othergrid[i] = subImgArr[mapHeight * mapWidth - 1];
     gridIDArr[i] = mapHeight * mapWidth - 1;
-    grid[i] = subImgArr[mapHeight * mapWidth - 1].get(0, 0, tileSize, tileSize);
+    grid[i] = subImgArr[mapHeight * mapWidth - 1];
   }
 }
 void LoadMap() {
@@ -267,9 +293,9 @@ void LoadMap() {
       temp = jsonArray.getInt(i*mapW + j);
       temp2 = jsonArray2.getInt(i*mapW + j);
       gridIDArr[i * mapW + j] = temp2;
-      grid[i * mapW + j] = subImgArr[temp2].get(0,0,tileSize,tileSize);
+      grid[i * mapW + j] = subImgArr[temp2];
       othergridIDArr[i * mapW + j] = temp;
-      othergrid[i * mapW + j] = subImgArr[temp].get(0,0,tileSize,tileSize);
+      othergrid[i * mapW + j] = subImgArr[temp];
     }
   }
 }

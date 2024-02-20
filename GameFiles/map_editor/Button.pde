@@ -24,7 +24,7 @@ class Button {
   void Update() {
   }
   void Display() {
-  if (mouseX >= x && mouseX <= x + Wh && mouseY >= y && mouseY <= y + Ht) {
+  if (mX >= x && mX <= x + Wh && mY >= y && mY <= y + Ht) {
     fill(100, 100);
     if (mouseClickBool == true) {
       fill(25, 255, 25);
@@ -41,7 +41,7 @@ class Button {
         }
       }
       else if (NewMapButton == true) {
-        NewMap();
+         NewMap();
       }
       else if (MapNameButton) {
         if (TakingInput == true) {

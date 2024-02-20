@@ -258,7 +258,7 @@ void SaveMap() {
   json.setJSONArray("layers", layers);
 
   // Save the JSONObject to a file
-  saveJSONObject(json, userInput);
+  saveJSONObject(json, "..\\Levels\\" + userInput);
   println("JSON file saved!");
 }
 void NewMap() {
@@ -280,7 +280,11 @@ void LoadMap() {
   int mapH;
   int temp;
   int temp2;
-  jsonMap = loadJSONObject(userInput);
+  jsonMap = loadJSONObject("..\\Levels\\" + userInput);
+  if (jsonMap == null) {
+    NewMap();
+    return;
+  }
   layers = jsonMap.getJSONArray("layers");
   layer = layers.getJSONObject(0);
   layer2 = layers.getJSONObject(1);

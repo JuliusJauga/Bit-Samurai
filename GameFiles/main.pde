@@ -2,7 +2,6 @@ import processing.sound.*;
 import ddf.minim.*;
 Minim minim, minim2;
 AudioPlayer lose, coin, jump, land;
-//SoundFile lose;
 PImage myImage;
 PImage background;
 PImage subimage;

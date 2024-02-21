@@ -20,13 +20,13 @@ class Player {
     int tilething;
     Player() {
     x = 64;
-    y = height / 2;
+    y = mapHeight/ 2 * resize;
     w = 64;
     h = 64;
     }
     void reset() {
       x = 64;
-      y = height / 2;
+      y = mapHeight/ 2 * resize;
       w = 64;
       h = 64;
     }
@@ -46,17 +46,27 @@ class Player {
         lose.rewind();
         reset_game();
       }
+      if (x + 17 < 0) {
+        LeftCollision = true;
+      }
+      else if (x + resize > mapWidth * resize) {
+        RightCollision = true;
+      }
       //int tile2 = y / resize;
-      fill(255);
-      text("BottomCollision: " + BottomCollision, x, y - 200);
-      textSize(10);
       //TopCollision = (CollisionChecker(4, 4) || CollisionChecker(60, 4));
     }
     void display() {
       //rect(x,y,64,64);
       playerAnimation(getAnimationFrameIndex());
       textSize(30);
-      text("COINS LEFT " + coinCount, x - width / 2, y - height / 2 + 100);
+      fill(#D3D654, 100);
+      rect(-translateX, -translateY , 195, 50, 100);
+      fill(#54D6AC, 100);
+      rect(-translateX + 195, -translateY , 195, 50, 100);
+      fill(#050500);
+      text("COINS LEFT " + coinCount, -translateX + 5, -translateY + resize/2 + 5);
+      text("LEVEL " + str(currentLevel), -translateX + 245, -translateY + resize/2 + 5);
+      text("X : " + x + "   Y : " + y, x, y - 100);
       textSize(10);
     }
     void goLeft() {
@@ -68,7 +78,12 @@ class Player {
           playerSpeedX -= acceleration; 
         }
         x += playerSpeedX;
-        translateX -= playerSpeedX;
+        if (x > width / 2) {
+          if (x + resize/2> (mapWidth * 64 - width / 2 + resize)) {
+          }
+          else translateX -= playerSpeedX;
+        }
+        
       }
     }
     void goRight() {
@@ -80,7 +95,11 @@ class Player {
           playerSpeedX += acceleration;
         }
         x += playerSpeedX;
-        translateX -= playerSpeedX;
+        if (x > width / 2) {
+          if (x > (mapWidth * 64 - width / 2)) {
+          }
+          else translateX -= playerSpeedX;
+        }
       }
     }
     void goDown() {
@@ -106,6 +125,11 @@ class Player {
         }
         y += playerSpeedY;
         translateY -= playerSpeedY;
+        /*if (y > height / 2) {
+          if (y < (mapHeight * 64 - height / 2)) {
+          }
+          else translateY -= playerSpeedY;
+        }*/
         return;
       }
       
@@ -135,6 +159,11 @@ class Player {
         playerSpeedY -= jumpStrength;
         y += playerSpeedY;
         translateY -= playerSpeedY;
+        /*if (y > height / 2) {
+          if (y < (mapHeight * 64 - height / 2)) {
+          }
+          else translateY -= playerSpeedY;
+        }*/
       }
     }
     boolean CollisionChecker(int dX, int dY) {
@@ -145,15 +174,11 @@ class Player {
         lose.rewind();
         reset_game();
       }
-      if (tile > mapWidth) {
-        if (loadJSONObject("Levels\\level" + str(currentLevel + 1) + ".json") == null) {
-          return false;
-        }
-        else if (coinCount == 0){
+      if (tile > mapWidth - 2 && coinCount == 0) {
+        if (loadJSONObject("Levels\\level" + str(currentLevel + 1) + ".json") != null) {
           currentLevel++;
           reset_game();
         }
-        return false;
       }
       if (tile > mapWidth - 1 || tile < 0 || tile2 > mapHeight - 1 || tile2 < 0) return false;
       else if (jsonArray.getInt(tile2 * mapWidth + tile) == coinTile) {
@@ -166,7 +191,7 @@ class Player {
         coinCount--;
         return false;
       }
-      else if (jsonArray.getInt(tile2 * mapWidth + tile) >= spikeTile && jsonArray.getInt(tile2 * mapWidth + tile) <= spikeTile + 4) {
+       else if (jsonArray.getInt(tile2 * mapWidth + tile) >= spikeTile && jsonArray.getInt(tile2 * mapWidth + tile) <= spikeTile + 4) {
         return false;
       }
       else if (jsonArray.getInt(tile2 * mapWidth + tile) >= airTile) {

@@ -35,6 +35,8 @@ JSONObject layer2;
 boolean notAir = true;
 int translateX;
 int translateY;
+int translateBackgroundX;
+int translateBackgroundY;
 int playerSpeedY;
 int playerSpeedX;
 int belowPlayerTile;
@@ -42,7 +44,7 @@ boolean keyAPressed = false;
 boolean keyDPressed = false;
 boolean spacePressed = false;
 
-int currentLevel = 1;
+int currentLevel = 4;
 int airTile = 143;
 int spikeTile = 133;
 int coinTile = 17;
@@ -65,7 +67,7 @@ boolean notLeftWall = true;
 boolean notRightWall = true;
 PImage[] subimage_array;
 void setup() {
-  size(1280,640);
+  size(1280, 1080);
   //frameRate(60);
   ok = new Player();
   reset_game();
@@ -78,7 +80,7 @@ void setup() {
   jumpRightSource = loadImage("Animations\\JUMP_RIGHT.png");
   climbRightSource = loadImage("Animations\\CLIMB_RIGHT.png");
   climbLeftSource = loadImage("Animations\\CLIMB_LEFT.png");
-  background.resize(width,0);
+  //background.resize(widt,0);
   sheetHeight = myImage.height / tileSize;
   sheetWidth = myImage.width / tileSize;
   subimage_array = new PImage[sheetHeight * sheetWidth];
@@ -112,11 +114,18 @@ void draw() {
   if (elapsedTime >= 600) {
     startTime = millis();
   }
-  image(background, 0 ,0);
+  translateBackgroundX = translateX / 6;
+  translateBackgroundY = translateY / 6;
+  image(background, translateBackgroundX - width/ 4, translateBackgroundY );
   text(mouseX + " : " + mouseY, 400, 200);
   text("Player speed Y: " + playerSpeedY, 400, 300);
   text("Player speed X: " + playerSpeedX, 400, 400);
+  //if (x > width * 0.4 && x < width * 0.4) {
+  //  translateX -= playerSpeedX;
+  //}
+  //else {
   translate(translateX, translateY);
+  //}
   DrawMapArray();
   ok.display();
   ok.update();
@@ -167,7 +176,7 @@ void DrawMapArray() {
 void reset_game() {
   coinCount = 0;
   ok.reset();
-  jsonMap = loadJSONObject("Levels\\level" + str(currentLevel) + ".json");
+  jsonMap = loadJSONObject("Levels\\level" + str(currentLevel) +  ".json");
   layers = jsonMap.getJSONArray("layers");
   layer = layers.getJSONObject(1);
   layer2 = layers.getJSONObject(0);
@@ -183,5 +192,5 @@ void reset_game() {
     }
   }
   translateY = 0;
-  translateX = width / 2;
+  translateX = 0;
 }

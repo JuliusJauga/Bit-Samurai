@@ -1,9 +1,11 @@
+/**
+* Class of Button.
+* Used for making new buttons and displaying them.
+* @author Julius Jauga 5 gr.
+*/
 class Button {
-  int x;
-  int y;
-  int Wh;
-  int Ht;
   String Text;
+  int x, y, Wh, Ht;
   int colour;
   
   boolean SolidLayerButton = false;
@@ -13,6 +15,13 @@ class Button {
   boolean LoadMapButton = false;
   boolean MapNameButton = false;
   
+  /**
+  * Constructor for button class. Sets the default text and colour.
+  * @param x - x coordinates for a button.
+  * @param y - y coordinates for a button.
+  * @param Wh - width of a button on x coordinates.
+  * @param Ht - height of a button on y coordinates.
+  */
   Button(int x, int y, int Wh, int Ht) {
     this.x = x;
     this.y = y;
@@ -21,19 +30,20 @@ class Button {
     colour = 255;
     Text = "Button";
   }
-  void Update() {
-  }
+  /**
+  * Display method for buttons, checks the button type and calls a corresponding method from map_editor class.
+  */
   void Display() {
-  if (mX >= x && mX <= x + Wh && mY >= y && mY <= y + Ht) {
-    fill(100, 100);
-    if (mouseClickBool == true) {
-      fill(25, 255, 25);
-      if (SolidLayerButton == true) {
-        if (CollisionLayer == false) {
-          CollisionLayer = true;
-          noCollisionLayer = false;
+    if (mX >= x && mX <= x + Wh && mY >= y && mY <= y + Ht) {
+      fill(100, 100);
+      if (mouseClickBool == true) {
+        fill(25, 255, 25);
+        if (SolidLayerButton == true) {
+          if (CollisionLayer == false) {
+            CollisionLayer = true;
+            noCollisionLayer = false;
+          }
         }
-      }
       else if (NonSolidLayerButton == true) {
         if (noCollisionLayer == false) {
           noCollisionLayer = true;
@@ -41,7 +51,7 @@ class Button {
         }
       }
       else if (NewMapButton == true) {
-         NewMap();
+        NewMap();
       }
       else if (MapNameButton) {
         if (TakingInput == true) {
@@ -79,10 +89,7 @@ class Button {
       }
     }
   }
-  //fill(255,0,0);
   rect(x,y,Wh,Ht);
-  //fill(0,255,0);
-  //rect(x+4,y+4,Wh-4,Ht-4);
   fill(0);
   text(Text, x + (Wh/2 - Wh/4), y + (Ht / 2 + Ht / 4));
   }
